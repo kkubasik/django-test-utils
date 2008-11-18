@@ -76,11 +76,16 @@ class Command(BaseCommand):
                 resp, time_to_run = time_function(lambda: c.get(url, request_dic))
             else:
                 resp = c.get(url, request_dic)
-            soup = BeautifulSoup(resp.content)
-            if CHECK_HTML:
-                if soup.find(text='&lt;') or soup.find(text='&gt;'):
-                    print "%s has dirty html" % url
-            hrefs = [a['href'] for a in soup.findAll('a') if a.has_key('href')]
+
+            if resp.status_code in [301,302]:
+                hrefs = [resp['location'].replace('http://testserver','')]
+            else:
+                soup = BeautifulSoup(resp.content)
+                if CHECK_HTML:
+                    if soup.find(text='&lt;') or soup.find(text='&gt;'):
+                        print "%s has dirty html" % url
+                hrefs = [a['href'] for a in soup.findAll('a') if a.has_key('href')]
+
             for a in hrefs:
                 parsed_href = urlparse.urlparse(a)
                 if parsed_href.path.startswith('/') and not parsed_href.scheme:
