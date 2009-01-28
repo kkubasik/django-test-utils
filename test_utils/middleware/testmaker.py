@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.test import Client
 from django.test.utils import setup_test_environment
-import logging, re, os
+import logging, re, os, copy
 from django.utils.encoding import force_unicode
 from django import template
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify as base_slugify
 import time
 
 log = logging.getLogger('testmaker')
@@ -25,6 +25,10 @@ DEFAULT_TAGS = ['autoescape' , 'block' , 'comment' , 'cycle' , 'debug' ,
 'with' ]
 
 tag_re = re.compile('({% (.*?) %})')
+def slugify(toslug):
+	"""docstring for slugify"""
+	return re.sub("-","_",base_slugify(toslug))
+#to_under_re = re.sub("-","_")
 
 class TestMakerMiddleware(object):
    def process_request(self, request):
@@ -54,7 +58,7 @@ def log_request(request):
    request_str = "'%s', {" % request.path
    for dikt in request.REQUEST.dicts:
       for arg in dikt:
-         request_str += "'%s': '%s'" % (arg, request.REQUEST[arg])
+         request_str += "' %s ': ' %s ', " % (arg, request.REQUEST[arg])
    request_str += "}"
    log.info("\t\tr = c.%s(%s)" % (method, request_str))
 
@@ -70,7 +74,11 @@ def get_user_context(context_list):
       ret = context_list.dicts[-1]
       if ret == {}:
          ret = context_list.dicts[0]
-      return ret.copy()
+      try:
+        return ret.copy()
+      except Exception, e:
+        return dict()
+        
    else:
       return context_list
 
@@ -79,7 +87,7 @@ def output_user_context(context):
         try:
             #Avoid memory addy's which will change.
             if not re.search("0x\w+", force_unicode(context[var])):
-                log.info(u'\t\tself.assertEqual(unicode(r.context[-1]["%s"]), u"%s")' % (var, force_unicode(context[var])))
+                log.info(u'''\t\tself.assertEqual(unicode(r.context[-1]["""%s"""]), u"""%s""")''' % (var, force_unicode(context[var])))
         except UnicodeDecodeError, e:
             #FIXME: This might blow up on odd encoding
             pass
@@ -127,7 +135,7 @@ def create_ttag_string(context_names, out_context, loaded_classes, tag_string):
     output_ttag(template_string, rendered_string, out_context)
 
 def output_ttag(template_str, output_str, context):
-    log.info('\t\ttmpl = template.Template(u"""%s""")' % template_str)
+    log.info('''\t\ttmpl = template.Template(u"""%s""")''' % template_str)
     context_str = "{"
     for con in context:
         try:
@@ -137,6 +145,6 @@ def output_ttag(template_str, output_str, context):
             #sometimes there be integers here
             pass
     context_str += "}"
-
-    log.info('\t\tcontext = template.Context(%s)' % context_str)
-    log.info('\t\tself.assertEqual(tmpl.render(context), u"%s")' % output_str)
+    
+    log.info('''\t\tcontext = template.Context(%s)''' % context_str)
+    log.info('''\t\tself.assertEqual(tmpl.render(context), u"""%s""")''' % output_str)
