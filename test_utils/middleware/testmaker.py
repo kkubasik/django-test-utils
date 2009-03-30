@@ -37,7 +37,10 @@ class TestMakerMiddleware(object):
          if request.method.lower() == "get":
             setup_test_environment()
             c = Client(REMOTE_ADDR='127.0.0.1')
-            getdict = request.GET.copy()
+            if request.GET:
+               getdict = request.GET.copy()
+            else:
+               getdict = request.POST.copy()
             getdict['test_client_true'] = 'yes' #avoid recursion
             r = c.get(request.path, getdict)
             log_status(request.path, r)
