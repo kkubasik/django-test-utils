@@ -80,6 +80,7 @@ class Serializer(object):
     def flush(self):
         """Flush buffered Serialization data to disk"""
         ser.info(self.strio_buffer)
+        self.strio_buffer = StringIO()
 
 
 ########################################################################
@@ -92,10 +93,11 @@ class Processer(object):
         pass
 
     #----------------------------------------------------------------------
-    def process_req(self,request,response):
+    def process_req(self,request,rtuple):
         """Turn the 2 requests into a unittest"""
         self.log_request(request)
-        self.log_status(request.path, response)
+        response = rtuple[1]
+        self.log_status(rtuple[0], response)
         if response.context and response.status_code != 404:
             user_context = get_user_context(response.context)
             output_user_context(user_context)
