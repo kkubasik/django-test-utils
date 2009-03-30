@@ -94,7 +94,8 @@ class Processer(object):
     #----------------------------------------------------------------------
     def process_req(self,request,response):
         """Turn the 2 requests into a unittest"""
-
+        self.log_request(request)
+        self.log_status(request.path, response)
         if response.context and response.status_code != 404:
             user_context = get_user_context(response.context)
             output_user_context(user_context)
