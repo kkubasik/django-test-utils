@@ -7,7 +7,7 @@ from test_utils.crawler import Crawler
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('-p', '--pdb', action='store_true', dest='pdb', default=False,
+        make_option('-d', '--pdb', action='store_true', dest='pdb', default=False,
             help='Pass -p to drop into pdb on an error'),
         make_option('-f', '--fixture', action='store_true', dest='fixtures', default=False,
             help='Pass -f to create a fixture for the data.'),
@@ -17,6 +17,12 @@ class Command(BaseCommand):
             help='Pass -t to time your requests.'),
         make_option('-r', '--response', action='store_true', dest='response', default=False,
             help='Pass -r to store the response objects.'),
+        make_option('-u', '--username', action='store_true', dest='username', default=False,
+                    help='Pass -u to set a username'),
+        make_option('-p', '--password', action='store_true', dest='password', default=False,
+                    help='Pass -p to set a password');
+        
+        
         #TODO
         make_option('-e', '--each', action='store', dest='each',
             type='int',
@@ -51,5 +57,5 @@ class Command(BaseCommand):
 
             #Now we have all of our URLs to test
 
-        c = Crawler('/', conf_urls=conf_urls, verbosity=verbosity)
+        c = Crawler('/', conf_urls=conf_urls, verbosity=verbosity,username=username,password=password)
         c.run()

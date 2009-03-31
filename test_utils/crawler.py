@@ -21,7 +21,7 @@ class Crawler(object):
     """
     This is a class that represents a URL crawler in python
     """
-    def __init__(self, base_url, conf_urls={}, verbosity=1):
+    def __init__(self, base_url, conf_urls={}, verbosity=1,username=None,password=None):
         self.base_url = base_url
         self.conf_urls = conf_urls
         self.verbosity = verbosity
@@ -31,7 +31,8 @@ class Crawler(object):
         self.crawled = {}
 
         self.c = Client(REMOTE_ADDR='127.0.0.1')
-
+        if username:
+            self.c.login(username=username,password=password) 
         self.plugins = []
         for plug in Plugin.__subclasses__():
             active = getattr(plug, 'active', True)

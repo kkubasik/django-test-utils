@@ -53,6 +53,8 @@ class TestMakerMiddleware(object):
                 getdict['test_client_true'] = 'yes' #avoid recursion
                 r = c.get(request.path, getdict)
                 self.serializer.save_response(request.path, r)
+                self.processer.process_req(request,(request.path,r))
+                
 
 
 
