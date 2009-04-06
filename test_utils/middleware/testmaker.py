@@ -39,7 +39,7 @@ class TestMakerMiddleware(object):
         """Assign a Serializer and Processer"""
         self.serializer = Serializer()
         self.processer = Processer()
-    
+
     def process_request(self, request):
         if 'test_client_true' not in request.REQUEST:
             self.serializer.save_request(request)
@@ -54,7 +54,7 @@ class TestMakerMiddleware(object):
                 r = c.get(request.path, getdict)
                 self.serializer.save_response(request.path, r)
                 self.processer.process_req(request,(request.path,r))
-                
+
 
 
 
@@ -109,11 +109,11 @@ class Processer(object):
                 #Another hack
                 log.error("Error! %s" % e)
 
-    
+
     def log_request(self,request):
         #pickle.dump(request,stio_buffer,pickle.HIGHEST_PROTOCOL)
         #log.info(stio_buffer)
-    
+
         log.info('\n\tdef test_%s_%s(self): ' % (slugify(request.path), slugify(time.time())))
         method = request.method.lower()
         request_str = "'%s', {" % request.path
@@ -122,15 +122,15 @@ class Processer(object):
                 request_str += "' %s ': ' %s ', " % (arg, request.REQUEST[arg])
         request_str += "}"
         log.info("\t\tr = c.%s(%s)" % (method, request_str))
-    
+
     def log_status(self,path, request):
         #pickle.dump((path,request), stio_buffer,pickle.HIGHEST_PROTOCOL)
         #log.info(stio_buffer)
-    
+
         log.info("\t\tself.assertEqual(r.status_code, %s)" % request.status_code)
         if request.status_code in [301, 302]:
             log.info("\t\tself.assertEqual(r['Location'], %s)" % request['Location'])
-    
+
     def get_user_context(self,context_list):
         #Ugly Hack. Needs to be a better way
         if isinstance(context_list, list):
@@ -142,10 +142,10 @@ class Processer(object):
                 return ret.copy()
             except Exception, e:
                 return dict()
-    
+
         else:
             return context_list
-    
+
     def output_user_context(self,context):
         for var in context:
             try:
@@ -154,9 +154,9 @@ class Processer(object):
                     log.info(u'''\t\tself.assertEqual(unicode(r.context[-1]["""%s"""]), u"""%s""")''' % (var, force_unicode(context[var])))
             except UnicodeDecodeError, e:
                 pass
-    
+
     ### Template Tag Maker stuff
-    
+
     def output_ttag_tests(self,context, templ):
         #Loaded classes persist so this is hacked in.
         loaded_classes = []
@@ -166,7 +166,7 @@ class Processer(object):
                 temp_string = template_file.read()
                 for line in temp_string.split('\n'):
                     loaded_classes = parse_template_line(line, loaded_classes, context)
-    
+
     def parse_template_line(self,line, loaded_classes, context):
         #Context (that we care about) is just for a single tag
         out_context = {}
@@ -187,7 +187,7 @@ class Processer(object):
                         context_names.append(bits[bit_num+1])
                 create_ttag_string(context_names, out_context, loaded_classes, mat.group(0))
         return loaded_classes
-    
+
     def create_ttag_string(self,context_names, out_context, loaded_classes, tag_string):
         con_string = ""
         for var in context_names:
@@ -196,7 +196,7 @@ class Processer(object):
         template_obj = template.Template(template_string)
         rendered_string = template_obj.render(template.Context(out_context))
         output_ttag(template_string, rendered_string, out_context)
-    
+
     def output_ttag(self,template_str, output_str, context):
         log.info('''\t\ttmpl = template.Template(u"""%s""")''' % template_str)
         context_str = "{"
@@ -208,11 +208,11 @@ class Processer(object):
                 #sometimes there be integers here
                 pass
         context_str += "}"
-    
+
         log.info('''\t\tcontext = template.Context(%s)''' % context_str)
         log.info('''\t\tself.assertEqual(tmpl.render(context), u"""%s""")''' % output_str)
-    
-    
+
+
 
 
 ### Testmaker stuff
