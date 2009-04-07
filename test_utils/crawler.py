@@ -8,6 +8,9 @@ def _parse_urls(url, resp):
     soup = BeautifulSoup(resp.content)
     returned_urls = []
     hrefs = [a['href'] for a in soup.findAll('a') if a.has_key('href')]
+    feeds = (a['href'] for a in soup.findAll('link') 
+             if a.has_key('rel') and a['rel'].lower() == 'alternate')
+    hrefs.extend(feeds)
     for a in hrefs:
         parsed_href = urlparse.urlparse(a)
         if parsed_href.path.startswith('/') and not parsed_href.scheme:
