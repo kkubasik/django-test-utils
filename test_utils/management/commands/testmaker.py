@@ -45,7 +45,7 @@ class Command(AppCommand):
         tests_dir = path.join(base_dir, 'tests')
         test_file = path.join(tests_dir, '%s_testmaker.py' % (app_name))
         serialize_file = path.join(tests_dir, '%s_testdata.pickle' % (app_name))
-        
+
         if not path.exists(tests_dir):
             os.mkdir(tests_dir)
         if path.exists(test_file):
@@ -73,6 +73,11 @@ class Command(AppCommand):
         handler_s.setFormatter(logging.Formatter('%(message)s'))
         log_s.addHandler(handler_s)
 
+        log_s = logging.getLogger('testserializer')
+        log_s.setLevel(logging.INFO)
+        handler_s = logging.FileHandler(serialize_file, 'a')
+        handler_s.setFormatter(logging.Formatter('%(message)s'))
+        log_s.addHandler(handler_s)
 
         if new_tests:
             #TODO Use a template for this
